@@ -17,12 +17,13 @@ module Ocar
   private
   def setup_request track_id
     requests = TYPES.map { |type|
+      # e.g. http://www.oca.com.ar/?q=package-locator&type=paquetes&number=1808200000001055400
       request = Typhoeus::Request.new("http://www.oca.com.ar",
         method: :get,
         params: { q: "package-locator",
         type: type,
         number: track_id },
-        headers: { Accept: "text/html" }
+        headers: { Accept: "application/json, text/javascript, */*; q=0.01" }
       )
       $hydra.queue(request)
       request
@@ -39,15 +40,6 @@ module Ocar
       parsed = JSON.parse request.response.body
       results << parsed if parsed['success'] == true
     end
-    return check_response results
-  end
-
-
-  def check_response results
-    if results.any?
-      Ocar::Status.new(results.first)
-    else
-      nil
-    end
+    results
   end
 end
